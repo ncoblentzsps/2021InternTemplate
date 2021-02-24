@@ -8,7 +8,9 @@ using System.Threading.Tasks;
 namespace _2021InternTemplate.Models
 {
     public class ApplicationDBContext : IdentityDbContext<MoneroUser>
-    {        
+    {
+        public DbSet<Wallet> Wallets { get; set; }
+        public DbSet<WalletTransactions> Transactions { get; set; }
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options)
             : base(options)
         {

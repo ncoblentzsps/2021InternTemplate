@@ -43,10 +43,15 @@ namespace _2021InternTemplate.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel viewModel)
         {
+            Wallet w = new Wallet() { Balance = 100 };
+            WalletTransactions t = new WalletTransactions() { Name = "Initial", Amount = 100 };
+            w.Transactions = new List<WalletTransactions>();
+            w.Transactions.Add(t);
             MoneroUser user = new MoneroUser()
             {
-                Email=viewModel.Email,
-                UserName=viewModel.Username                
+                Email = viewModel.Email,
+                UserName = viewModel.Username,
+                Wallet = w
             };
             IdentityResult result = await _userManager.CreateAsync(user, viewModel.Password);
             if(result.Succeeded)
