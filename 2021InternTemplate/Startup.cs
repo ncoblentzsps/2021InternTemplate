@@ -1,4 +1,5 @@
 using _2021InternTemplate.Models;
+using _2021InternTemplate.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -33,6 +34,9 @@ namespace _2021InternTemplate
                 .AddDefaultTokenProviders();
 
             services.AddControllersWithViews();
+            services.AddSession();
+            services.AddSingleton<IConfiguration>(Configuration);
+            services.AddTransient<IMoneroEmailService, MoneroEmailService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -54,6 +58,7 @@ namespace _2021InternTemplate
             app.UseRouting();
 
             app.UseAuthorization();
+            app.UseSession();
 
             app.UseEndpoints(endpoints =>
             {

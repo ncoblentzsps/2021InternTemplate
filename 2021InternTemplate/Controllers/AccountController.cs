@@ -1,6 +1,8 @@
 ﻿using _2021InternTemplate.Models;
+using _2021InternTemplate.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -15,15 +17,18 @@ namespace _2021InternTemplate.Controllers
         private readonly ApplicationDBContext _dbContext;
         private readonly UserManager<MoneroUser> _userManager;
         private readonly SignInManager<MoneroUser> _loginManager;
+        private readonly IMoneroEmailService _emailService;
         public AccountController(ILogger<AccountController> logger,
             UserManager<MoneroUser> userManager,
             SignInManager<MoneroUser> loginManager,
-            ApplicationDBContext dbContext)
+            ApplicationDBContext dbContext,
+            IMoneroEmailService emailService)
         {
             _logger = logger;
             _userManager = userManager;
             _loginManager = loginManager;
             _dbContext = dbContext;
+            _emailService = emailService;
         }
         public IActionResult Index()
         {
@@ -61,10 +66,16 @@ namespace _2021InternTemplate.Controllers
         public async Task<IActionResult> Login(LoginViewModel viewModel)
         {
             MoneroUser user = await _userManager.FindByNameAsync(viewModel.Username);
-            var result = await _loginManager.CheckPasswordSignInAsync(user, viewModel.Password,false);
+            var result = await _loginManager.CheckPasswordSignInAsync(user, viewModel.Password,false);            
+
             if (result.Succeeded)
             {
-                return RedirectToAction("Index", "Home");
+                string code = new Random().Next(0, 999999).ToString("000000");
+                _emailService.SendLoginCode(user.Email, code);
+                user.Code = code;
+                await _userManager.UpdateAsync(user);
+                HttpContext.Session.SetString("UserId", user.Id);
+                return RedirectToAction("ConfirmCode", "Account");
             }
             return View(viewModel);
         }
