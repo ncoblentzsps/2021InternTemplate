@@ -8,9 +8,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace _2021InternTemplate.Controllers
-{
+{    
     public class AccountController : Controller
     {
         private readonly ILogger<AccountController> _logger;
@@ -44,16 +45,34 @@ namespace _2021InternTemplate.Controllers
         public async Task<IActionResult> Register(RegisterViewModel viewModel)
         {
             Wallet w = new Wallet() { Balance = 100 };
+            _dbContext.Add(w);
+            await _dbContext.SaveChangesAsync();
+
             WalletTransactions t = new WalletTransactions() { Name = "Initial", Amount = 100 };
-            w.Transactions = new List<WalletTransactions>();
-            w.Transactions.Add(t);
+            t.WalletId = w.Id;
+            _dbContext.Add(t);
+            await _dbContext.SaveChangesAsync();
+            //w.Transactions = new List<WalletTransactions>();
+            //w.Transactions.Add(t);
+
+            w.Balance = 150;
+            _dbContext.Update(w);            
+
+            WalletTransactions transaction2 = new WalletTransactions() { Name = "Add Fifty", Amount = 50,WalletId=w.Id };
+            _dbContext.Add(transaction2);
+            await _dbContext.SaveChangesAsync();
+
+
+
             MoneroUser user = new MoneroUser()
             {
                 Email = viewModel.Email,
                 UserName = viewModel.Username,
-                Wallet = w
+                WalletId = w.Id
             };
             IdentityResult result = await _userManager.CreateAsync(user, viewModel.Password);
+
+
             if(result.Succeeded)
             {
                 return RedirectToAction("Index", "Home");
