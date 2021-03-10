@@ -54,7 +54,7 @@ namespace _2021InternTemplate.Controllers
             await _dbContext.SaveChangesAsync();
             //w.Transactions = new List<WalletTransactions>();
             //w.Transactions.Add(t);
-
+            
             w.Balance = 150;
             _dbContext.Update(w);            
 
